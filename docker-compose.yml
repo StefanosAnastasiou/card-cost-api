@@ -1,0 +1,33 @@
+version: '3.1'
+services:
+  card-cost-api:
+    image: card-cost-api:latest
+    container_name: card-cost-api
+    ports:
+      - 8087:8087
+    depends_on:
+      - database
+      - redis
+    restart: on-failure
+  database:
+    image: mysql:latest
+    restart: on-failure
+    container_name: database
+    volumes:
+      - ./database-init:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
+    environment:
+         MYSQL_DATABASE: 'ClearingCost'
+         MYSQL_ROOT_PASSWORD: 'password'
+         MYSQL_PASSWORD: 'password'
+    command: ['mysqld', '--character-set-server=utf8']
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass redispass
+    volumes:
+      - ./cache:/data
